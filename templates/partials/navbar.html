@@ -1,0 +1,31 @@
+{% load static %}{% url 'properties:property_create' as post_url %}
+<div class="topbar">
+  <a class="brand" href="{% url 'properties:home' %}">
+    <img class="brand-mark" src="{% static 'img/logo.svg' %}" alt="Ghorify logo">
+    <div class="brand-name">
+      <span class="full">Ghorify</span>
+      <span class="tag">Smart House Rental · Find your next home, simply</span>
+    </div>
+  </a>
+  <div class="top-actions">
+    {% if user.is_authenticated and user.is_platform_admin %}
+      <a class="btn btn-ghost" href="{% url 'dashboard:home' %}">Admin Panel</a>
+    {% elif user.is_authenticated %}
+      <a class="btn btn-ghost" href="{% url 'interactions:favourite_list' %}"><span class="post-btn-full">♥ Favorites</span><span class="post-btn-short">♥</span></a>
+      <a class="btn btn-ghost d-none d-md-inline-block" href="{% url 'properties:my_properties' %}">My Listings</a>
+      <a class="btn btn-solid" href="{{ post_url }}"><span class="post-btn-full">+ Post Your Property</span><span class="post-btn-short">+ Post</span></a>
+    {% else %}
+      <a class="btn btn-ghost" href="{% url 'accounts:login' %}?next={% url 'interactions:favourite_list' %}" onclick="return !needLogin('Please log in first, then you can see your favorites.')"><span class="post-btn-full">♥ Favorites</span><span class="post-btn-short">♥</span></a>
+      <a class="btn btn-solid" href="{% url 'accounts:login' %}?next={{ post_url }}" onclick="return !needLogin('Please log in first, then you can post your property.')"><span class="post-btn-full">+ Post Your Property</span><span class="post-btn-short">+ Post</span></a>
+    {% endif %}
+
+    {% if user.is_authenticated %}
+      <button class="icon-btn" title="Settings" onclick="openModal('settingsModal')">⚙</button>
+      <a class="btn btn-ghost d-none d-sm-inline-block" href="{% url 'dashboard:home' %}">{{ user.first_name|default:user.username }}</a>
+      <form method="post" action="{% url 'accounts:logout' %}">{% csrf_token %}<button class="btn btn-solid">Log Out</button></form>
+    {% else %}
+      <a class="btn btn-ghost" href="{% url 'accounts:login' %}" onclick="return !openModal('loginModal')">Log In</a>
+      <a class="btn btn-solid" href="{% url 'accounts:register' %}" onclick="return !openModal('signupModal')">Sign Up</a>
+    {% endif %}
+  </div>
+</div>
