@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+{% load ghorify_tags %}
+{% block title %}My Dashboard{% endblock %}
+{% block content %}
+<div class="container">
+  <div class="page-header d-flex flex-wrap justify-content-between align-items-end gap-3">
+    <div>
+      <span class="eyebrow">My dashboard</span>
+      <h1>Hi {{ user.first_name|default:user.username }}!</h1>
+      <p class="text-muted mb-0" style="font-size:13.5px;">Look for a home or post your own property, all from one account.</p>
+    </div>
+    <div class="d-flex gap-2 flex-wrap">
+      <a href="{% url 'properties:property_list' %}" class="btn btn-outline">🔍 Find a Home</a>
+      <a href="{% url 'properties:property_create' %}" class="btn btn-solid">+ Post Your Property</a>
+    </div>
+  </div>
+
+  {% if profile.status == 'pending' or profile.status == 'rejected' %}
+  <div class="status-note {% if profile.status == 'rejected' %}bad{% else %}warn{% endif %} d-flex flex-wrap gap-3 align-items-center mb-4">
+    <div class="flex-grow-1">
+      <strong>Verification: {{ profile.get_status_display }}.</strong>
+      {% if profile.status == 'pending' %}An admin is checking your document. Once verified, your posts show a ✓ Verified badge.
+      {% elif profile.status == 'rejected' %}{{ profile.review_note|default:'Please upload a clearer document.' }}{% endif %}
+    </div>
+    {% if profile.status != 'pending' %}<a href="{% url 'accounts:profile' %}" class="btn btn-fill btn-sm">Upload document</a>{% endif %}
+  </div>
+  {% endif %}
+
+  <div class="row g-3 mb-4">
+    <div class="col-6 col-lg-3"><a href="{% url 'interactions:favourite_list' %}" class="stat-card text-reset"><div class="ic"><i class="bi bi-heart"></i></div><div><div class="num">{{ stats.favourites }}</div><div class="lbl">Favorite homes</div></div></a></div>
+    <div class="col-6 col-lg-3"><a href="{% url 'interactions:compare_select' %}" class="stat-card text-reset"><div class="ic"><i class="bi bi-layout-three-columns"></i></div><div><div class="num">{{ stats.comparisons }}</div><div class="lbl">Comparisons made</div></div></a></div>
+    <div class="col-6 col-lg-3"><a href="{% url 'properties:my_properties' %}" class="stat-card text-reset"><div class="ic"><i class="bi bi-houses"></i></div><div><div class="num">{{ stats.listings }}</div><div class="lbl">My listings</div></div></a></div>
+    <div class="col-6 col-lg-3"><a href="{% url 'properties:my_properties' %}?status=approved" class="stat-card text-reset"><div class="ic"><i class="bi bi-broadcast"></i></div><div><div class="num">{{ stats.published }}</div><div class="lbl">Published</div></div></a></div>
+  </div>
+
+  <div class="d-flex justify-content-between align-items-end mb-2 flex-wrap gap-2">
+    <h4 class="mb-0">Homes I posted</h4>
+    <a href="{% url 'properties:my_properties' %}" class="small fw-bold" style="color:var(--brick)">Manage all →</a>
+  </div>
+  <div class="gh-card overflow-hidden mb-4">
+    {% if my_listings %}
+    <table class="gh-table">
+      <thead><tr><th>Property</th><th>Status</th><th>Saved by</th><th></th></tr></thead>
+      <tbody>{% for p in my_listings %}
+        <tr>
+          <td><a href="{% url 'properties:property_detail' p.id %}" class="fw-semibold">{{ p.title|truncatechars:42 }}</a><div class="small text-muted">{{ p.price|taka }} · {{ p.location }}</div></td>
+          <td><span class="status status-{{ p.status }}">{{ p.get_status_display }}</span>
+            {% if p.status == 'rejected' and p.moderation_note %}<div class="small mt-1" style="color:var(--brick)">{{ p.moderation_note }}</div>{% endif %}</td>
+          <td>♥ {{ p.fav_count }}</td>
+          <td class="text-end"><a href="{% url 'properties:property_update' p.pk %}" class="btn btn-sm btn-soft">Edit</a></td>
+        </tr>{% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+      <div class="sh-empty" style="padding:30px;"><div class="big">🏠</div>You have not posted any property yet.<br><a class="btn btn-solid mt-3" href="{% url 'properties:property_create' %}">+ Post Your Property</a></div>
+    {% endif %}
+  </div>
+
+  <div class="d-flex justify-content-between align-items-end mb-2 flex-wrap gap-2">
+    <h4 class="mb-0">My favorite homes</h4>
+    <div class="d-flex gap-2">
+      <a href="{% url 'interactions:compare_select' %}" class="btn btn-sm btn-outline">⇄ Compare Now</a>
+      <a href="{% url 'interactions:favourite_list' %}" class="btn btn-sm btn-fill">See all</a>
+    </div>
+  </div>
+  <div class="sh-grid inset mb-5">
+    {% for fav in favourites %}
+      {% with p=fav.property %}{% include 'partials/property_card.html' %}{% endwith %}
+    {% empty %}
+      <div class="sh-empty"><div class="big">♡</div>No favorites yet. Tap ♡ on any listing to save it here.<br><a class="btn btn-fill mt-3" href="{% url 'properties:property_list' %}">Browse Listings</a></div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}
