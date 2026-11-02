@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+{% load humanize %}
+{% block title %}Compare Homes{% endblock %}
+{% block content %}
+<div class="herostrip">
+  <h1>Compare Your Favorite Homes</h1>
+  <p>{% if favourites %}Select 2 or 3 homes from your favorites to see them side by side{% else %}Save homes to your favorites first, then you can compare them here{% endif %}</p>
+</div>
+
+{% if favourites %}
+<form method="post" id="compareForm">{% csrf_token %}
+  <div class="sh-grid" style="padding-bottom:20px;">
+    {% for fav in favourites %}{% with p=fav.property %}
+    <label class="sh-card compare-pick">
+      <input type="checkbox" name="property" value="{{ p.pk }}" class="compare-check">
+      <div class="card-img"{% with img=p.primary_image %}{% if img %} style="background-image:url('{{ img.image.url }}')"{% endif %}{% endwith %}>
+        <span class="price-tag">৳{{ p.price|intcomma }}</span>
+        <span class="neg-tag">{% if p.is_negotiable %}Negotiable{% else %}Fixed{% endif %}</span>
+        <span class="pick-mark">✓</span>
+      </div>
+      <div class="card-body">
+        <div class="card-title">{{ p.title }}</div>
+        <div class="card-loc">📍 {{ p.location }}, Dhaka · {% if p.floor == 0 %}Ground floor{% else %}Floor {{ p.floor }}{% endif %}</div>
+        <div class="tag-row"><span class="tag">{{ p.get_category_display }}</span><span class="tag">{{ p.bedrooms }} Bed · {{ p.bathrooms }} Bath</span></div>
+      </div>
+    </label>
+    {% endwith %}{% endfor %}
+  </div>
+  <div class="compare-bar">
+    <span id="pickCount">0 selected</span>
+    <button class="btn btn-fill" id="compareBtn" disabled>⇄ Compare</button>
+  </div>
+</form>
+{% else %}
+<div class="sh-grid">
+  <div class="sh-empty">
+    <div class="big">♡</div>
+    You have no favorite homes yet.<br><strong>Please favorite a few homes first, then you can compare them.</strong><br>
+    <a class="btn btn-fill mt-3" href="{% url 'properties:property_list' %}">Browse Listings</a>
+  </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  // Allow 2 or 3 selections and show how many are picked.
+  (function () {
+    const checks = Array.from(document.querySelectorAll('.compare-check'));
+    const btn = document.getElementById('compareBtn');
+    const count = document.getElementById('pickCount');
+    if (!btn) return;
+    function update() {
+      const picked = checks.filter((c) => c.checked).length;
+      checks.forEach((c) => { c.disabled = !c.checked && picked >= 3; c.closest('.compare-pick').classList.toggle('picked', c.checked); });
+      count.textContent = picked + ' selected' + (picked < 2 ? ' — pick at least 2' : '');
+      btn.disabled = picked < 2;
+    }
+    checks.forEach((c) => c.addEventListener('change', update));
+    update();
+  })();
+</script>
+{% endblock %}

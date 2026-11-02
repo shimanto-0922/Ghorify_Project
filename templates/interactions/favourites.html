@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% block title %}Your Favorites{% endblock %}
+{% block content %}
+<div class="herostrip">
+  <h1>Your Favorites</h1>
+  <p>{% if favourites %}Homes you've saved{% else %}You haven't saved any homes yet — tap the ♡ on a listing to save it{% endif %}</p>
+</div>
+<div class="sh-grid">
+  {% for fav in favourites %}
+    {% with p=fav.property %}{% include 'partials/property_card.html' %}{% endwith %}
+  {% empty %}
+    <div class="sh-empty"><div class="big">🏠</div>No favorites saved yet — tap ♡ on any listing to save it here.<br><a class="btn btn-fill mt-3" href="{% url 'properties:property_list' %}">Browse Listings</a></div>
+  {% endfor %}
+</div>
+{% endblock %}
