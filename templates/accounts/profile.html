@@ -1,0 +1,71 @@
+{% extends 'base.html' %}
+{% block title %}My profile{% endblock %}
+{% block content %}
+<div class="container" style="max-width:1000px">
+  <div class="page-header"><span class="eyebrow">Account</span><h1>My profile</h1></div>
+  <form method="post" enctype="multipart/form-data" novalidate>{% csrf_token %}
+    <div class="row g-4">
+      <div class="col-lg-4">
+        <div class="gh-card gh-card-body text-center">
+          {% if user.avatar %}<img src="{{ user.avatar.url }}" class="avatar avatar-lg mb-3" alt="">{% else %}<span class="avatar avatar-lg mb-3">{{ user.first_name|first|upper }}{{ user.last_name|first|upper }}</span>{% endif %}
+          <h5 class="mb-0">{{ user.get_full_name|default:user.username }}</h5>
+          <div class="text-muted small mb-3">{{ user.phone }}</div>
+          {% if not user.is_platform_admin %}
+            {% with lp=user.profile %}
+            {% if lp.status != 'unsubmitted' %}<span class="status status-{{ lp.status }}">{{ lp.get_status_display }}</span>{% endif %}
+            {% if lp.status == 'rejected' and lp.review_note %}<p class="small text-danger mt-2 mb-0">{{ lp.review_note }}</p>{% endif %}
+            {% endwith %}
+          {% endif %}
+          <hr>
+          <div class="text-start">
+            <label class="form-label" for="id_avatar">Profile photo</label>
+            <input type="file" name="avatar" id="id_avatar" class="form-control form-control-sm" accept="image/*">
+            {{ user_form.avatar.errors }}
+            {% if user.avatar %}<div class="form-check mt-2"><input type="checkbox" name="avatar-clear" id="avatar-clear" class="form-check-input"><label for="avatar-clear" class="form-check-label small">Remove photo</label></div>{% endif %}
+          </div>
+          <a href="{% url 'accounts:password_change' %}" class="btn btn-soft btn-sm w-100 mt-3"><i class="bi bi-key me-1"></i>Change password</a>
+        </div>
+      </div>
+      <div class="col-lg-8">
+        <div class="gh-card gh-card-body p-4">
+          <div class="form-section">
+            <div class="form-section-title">Personal details</div>
+            <div class="row g-3">
+              <div class="col-md-6">{% include 'partials/field.html' with field=user_form.first_name %}</div>
+              <div class="col-md-6">{% include 'partials/field.html' with field=user_form.last_name %}</div>
+              <div class="col-md-6">{% include 'partials/field.html' with field=user_form.email %}</div>
+              <div class="col-md-6">{% include 'partials/field.html' with field=user_form.phone %}</div>
+            </div>
+            {% include 'partials/field.html' with field=user_form.bio %}
+          </div>
+
+          {% if profile_form %}
+          <div class="form-section">
+            <div class="form-section-title">Verification <span style="font-family:Inter,sans-serif;font-size:12px;font-weight:600;color:var(--muted-2);">(optional)</span></div>
+            <p class="small text-muted">Optional: upload your NID or Birth Certificate. After an admin checks it, your posts show a ✓ Verified badge. The files are linked only for you and the admin.</p>
+            <div class="row g-3">
+              {% for f in profile_form %}
+              <div class="col-md-6">
+                <label class="form-label" for="{{ f.id_for_label }}">{% if f.name == 'nid_document' %}NID (National ID){% else %}Birth Certificate{% endif %}</label>
+                {% if f.value %}
+                  <div class="small mb-2 d-flex align-items-center gap-2 flex-wrap">
+                    <span class="verified-badge">✓ Uploaded</span>
+                    <a href="{{ f.value.url }}" target="_blank" style="color:var(--brick);font-weight:600;">View file</a>
+                    <label class="d-inline-flex align-items-center gap-1" style="color:var(--muted);"><input type="checkbox" name="{{ f.name }}-clear" id="{{ f.name }}-clear"> Remove</label>
+                  </div>
+                {% endif %}
+                <input type="file" name="{{ f.name }}" id="{{ f.id_for_label }}" class="form-control" accept=".pdf,.jpg,.jpeg,.png">
+                <div class="form-text">PDF, JPG or PNG</div>
+                {{ f.errors }}
+              </div>
+              {% endfor %}
+            </div>
+          </div>
+          {% endif %}
+          <div class="text-end"><button class="btn btn-primary btn-lg">Save profile</button></div>
+        </div>
+      </div>
+    </div>
+  </form>
+</div>
+{% endblock %}
