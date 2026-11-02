@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+{% block content %}
+{% with url=request.resolver_match.url_name %}
+<div class="container">
+  <div class="row g-4 pt-4">
+    <aside class="col-lg-3">
+      <div class="gh-card gh-card-body sticky-side">
+        <div class="small text-uppercase fw-bold text-muted mb-2" style="letter-spacing:.1em">Admin panel</div>
+        <div class="list-group side-nav">
+          <a href="{% url 'dashboard:home' %}" class="list-group-item {% if url == 'home' or url == 'admin_overview' %}active{% endif %}"><i class="bi bi-speedometer2"></i>Overview</a>
+          <a href="{% url 'dashboard:moderation_list' %}" class="list-group-item {% if url == 'moderation_list' %}active{% endif %}"><i class="bi bi-house-check"></i>Listings</a>
+          <a href="{% url 'dashboard:verification_list' %}" class="list-group-item {% if url == 'verification_list' %}active{% endif %}"><i class="bi bi-patch-check"></i>Verification</a>
+          <a href="{% url 'dashboard:user_list' %}" class="list-group-item {% if url == 'user_list' %}active{% endif %}"><i class="bi bi-people"></i>Users</a>
+        </div>
+      </div>
+    </aside>
+    <section class="col-lg-9">{% block admin_content %}{% endblock %}</section>
+  </div>
+</div>
+{% endwith %}
+{% endblock %}
