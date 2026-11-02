@@ -1,0 +1,84 @@
+Member 3 - interactions + search apps
+=====================================
+
+How to use:
+  1. git clone the team repo and open the folder
+  2. git checkout -b member3_interactions_search
+  3. Extract this zip INTO the repo folder (keep the folders as they are)
+  4. Commit step by step (below), then: git push origin member3_interactions_search
+  5. Open a Pull Request on GitHub and merge it
+
+Order of merging: Member 1, then Member 2, then Member 3, then Member 4.
+The site runs fully only after all four parts are merged.
+
+Suggested commits:
+
+  Commit 1: Add interactions app with Favourite and Comparison models
+    git add interactions/__init__.py interactions/apps.py interactions/models.py interactions/migrations/
+    git commit -m "Add interactions app with Favourite and Comparison models"
+
+  Commit 2: Register interaction models in admin
+    git add interactions/admin.py
+    git commit -m "Register interaction models in admin"
+
+  Commit 3: Add favourite and compare views
+    git add interactions/views.py interactions/urls.py
+    git commit -m "Add favourite and compare views"
+
+  Commit 4: Add favourites and compare pages
+    git add templates/interactions/
+    git commit -m "Add favourites and compare pages"
+
+  Commit 5: Add interaction tests
+    git add interactions/tests.py
+    git commit -m "Add interaction tests"
+
+  Commit 6: Add search app and smart match form
+    git add search/__init__.py search/apps.py search/migrations/ search/forms.py
+    git commit -m "Add search app and smart match form"
+
+  Commit 7: Add smart match engine
+    git add search/matching.py
+    git commit -m "Add smart match engine"
+
+  Commit 8: Add smart match view and page
+    git add search/views.py search/urls.py templates/search/
+    git commit -m "Add smart match view and page"
+
+  Commit 9: Add smart match tests
+    git add search/tests.py
+    git commit -m "Add smart match tests"
+
+Files in this part (32):
+  interactions/__init__.py
+  interactions/admin.py
+  interactions/apps.py
+  interactions/migrations/0001_initial.py
+  interactions/migrations/0002_alter_report_reason.py
+  interactions/migrations/0003_delete_report.py
+  interactions/migrations/0004_remove_visitrequest_property_and_more.py
+  interactions/migrations/0005_remove_review_one_review_per_property_delete_review.py
+  interactions/migrations/0006_simple_model.py
+  interactions/migrations/0007_remove_unused_fields.py
+  interactions/migrations/__init__.py
+  interactions/models.py
+  interactions/tests.py
+  interactions/urls.py
+  interactions/views.py
+  search/__init__.py
+  search/apps.py
+  search/forms.py
+  search/matching.py
+  search/migrations/0001_initial.py
+  search/migrations/0002_searchcriteria_tenant_gender_and_more.py
+  search/migrations/0003_alter_searchcriteria_category_and_more.py
+  search/migrations/0004_delete_searchcriteria.py
+  search/migrations/__init__.py
+  search/tests.py
+  search/urls.py
+  search/views.py
+  templates/interactions/compare_select.html
+  templates/interactions/comparison_detail.html
+  templates/interactions/favourites.html
+  templates/search/_criteria_fields.html
+  templates/search/search.html
