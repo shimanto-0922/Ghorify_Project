@@ -1,0 +1,71 @@
+{% extends 'base.html' %}
+{% load static ghorify_tags %}
+{% block title %}{% if active_category %}{{ active_category|title }} Listings{% elif active_pricing %}{{ active_pricing|title }} Listings{% else %}Latest Rental Listings{% endif %}{% endblock %}
+{% block content %}
+{% with g=request.GET %}
+<div class="hero" style="--hero-img:url('{% static 'img/photos/hero_dhaka.jpg' %}')">
+  <div class="hero-overlay">
+    <h1>Welcome To Ghorify</h1>
+    <p>Find verified rental homes in Dhaka — updated every day</p>
+  </div>
+</div>
+
+<form method="get" id="filterForm">
+  <input type="hidden" name="category" value="{{ active_category }}">
+  <input type="hidden" name="gender" value="{{ active_gender }}">
+  <input type="hidden" name="pricing" value="{{ active_pricing }}">
+
+  <div class="filterbar">
+    <a class="fchip {% if not active_category and not active_pricing %}active{% endif %}" href="{% url 'properties:property_list' %}">All</a>
+    {% for key, label in categories %}
+      <a class="fchip {% if active_category == key %}active{% endif %}" href="?category={{ key }}">{{ label }}</a>
+    {% endfor %}
+    <a class="fchip {% if active_pricing == 'fixed' %}active{% endif %}" href="?pricing=fixed">Fixed</a>
+    <a class="fchip {% if active_pricing == 'negotiable' %}active{% endif %}" href="?pricing=negotiable">Negotiable</a>
+    <select class="select-chip" name="location" onchange="this.form.submit()" aria-label="Location">
+      <option value="">📍 Location</option>
+      {% for a in areas %}<option value="{{ a }}" {% if g.location == a %}selected{% endif %}>{{ a }}</option>{% endfor %}
+    </select>
+    <select class="select-chip" name="sort" onchange="this.form.submit()" aria-label="Sort">
+      <option value="">↕ Sort by Price</option>
+      <option value="price_low" {% if g.sort == 'price_low' %}selected{% endif %}>Price: Low to High</option>
+      <option value="price_high" {% if g.sort == 'price_high' %}selected{% endif %}>Price: High to Low</option>
+    </select>
+    <a class="fchip advanced" href="{% url 'search:search' %}">✨ Smart Match</a>
+    {% if user.is_authenticated and not user.is_platform_admin %}<a class="fchip advanced" href="{% url 'interactions:compare_select' %}">⇄ Compare Now</a>
+    {% elif not user.is_authenticated %}<a class="fchip advanced" href="{% url 'accounts:login' %}?next={% url 'interactions:compare_select' %}" onclick="return !needLogin('Please log in first, then you can compare properties.')">⇄ Compare Now</a>{% endif %}
+  </div>
+
+  <div class="genderbar {% if active_category == 'bachelor' %}show{% endif %}">
+    <a class="gbtn {% if active_gender == 'male' %}active{% endif %}" href="?category={{ active_category }}&gender=male">Male</a>
+    <a class="gbtn {% if active_gender == 'female' %}active{% endif %}" href="?category={{ active_category }}&gender=female">Female</a>
+  </div>
+
+</form>
+
+<div class="herostrip">
+  {% if active_category == 'bachelor' and not active_gender %}
+    <h1>Bachelor — select Male or Female</h1>
+    <p>Pick a gender above to see matching posts</p>
+  {% elif active_category and active_gender %}
+    <h1>{{ active_category|title }} — {{ active_gender|title }}</h1>
+    <p>Showing {{ active_category }} posts for {{ active_gender }}{% if page.paginator.count %} · {{ page.paginator.count }} found{% endif %}</p>
+  {% else %}
+    <h1>{% if active_category %}{{ active_category|title }} Listings{% elif active_pricing %}{{ active_pricing|title }} Listings{% else %}Latest Rental Listings{% endif %}</h1>
+    <p>Browse posts from verified landowners near you{% if page.paginator.count %} · {{ page.paginator.count }} found{% endif %}</p>
+  {% endif %}
+</div>
+
+<div class="sh-grid">
+  {% for p in page.object_list %}
+    {% include 'partials/property_card.html' %}
+  {% empty %}
+    {% if not active_category == 'bachelor' or active_gender %}
+    <div class="sh-empty"><div class="big">🏠</div>No listings match right now.</div>
+    {% endif %}
+  {% endfor %}
+</div>
+{% if page.has_other_pages %}<div style="margin-top:-40px;padding-bottom:40px">{% include 'partials/pagination.html' %}</div>{% endif %}
+{% endwith %}
+{% endblock %}
+

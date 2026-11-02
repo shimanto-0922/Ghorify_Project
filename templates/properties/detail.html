@@ -1,0 +1,129 @@
+{% extends 'base.html' %}
+{% load ghorify_tags humanize %}
+{% block title %}{{ property.title }}{% endblock %}
+{% block content %}
+{% is_favourite property as fav %}
+<div class="details-page-topbar">
+  <a class="btn btn-outline" href="{% url 'properties:property_list' %}">← Back to Listings</a>
+  {% if user.is_authenticated and property.landlord_id == user.id %}
+    <div class="d-flex gap-2 flex-wrap">
+      <a class="btn btn-fill btn-sm" href="{% url 'properties:property_update' property.pk %}">Edit Listing</a>
+      <a class="btn btn-outline btn-sm" href="{% url 'properties:image_list' property.pk %}">Photos</a>
+      <a class="btn btn-outline btn-sm" href="{% url 'properties:utility_list' property.pk %}">Bills</a>
+    </div>
+  {% endif %}
+</div>
+
+<div class="details-page-content">
+  {% if property.status != 'approved' %}
+    <div class="status-note {% if property.status == 'rejected' %}bad{% else %}warn{% endif %}">
+      <strong>{{ property.get_status_display }}.</strong>
+      {% if property.status == 'rejected' %}Admin note: {{ property.moderation_note|default:'No reason given.' }} Edit the listing to send it for review again.
+      {% else %}Only you and the admins can see this listing until it is approved.{% endif %}
+    </div>
+  {% endif %}
+
+  {% with images=property.images.all %}
+  <div class="gallery-main" id="galleryMain">
+    {% with first=images|first %}{% if first %}<img src="{{ first.image.url }}" alt="{{ first.caption|default:property.title }}">{% else %}<div class="ph">Photo coming soon</div>{% endif %}{% endwith %}
+  </div>
+  {% if images|length > 1 %}
+  <div class="gallery-thumbs" id="galleryThumbs">
+    {% for img in images %}<button type="button" class="thumb {% if forloop.first %}active{% endif %}" data-src="{{ img.image.url }}" onclick="switchGalleryPhoto(this)"><img src="{{ img.image.url }}" alt="{{ img.caption }}"></button>{% endfor %}
+  </div>
+  {% endif %}
+  {% endwith %}
+
+  <h2 style="margin-bottom:2px;">{{ property.title }} {% if property.landlord.profile.status == 'verified' %}<span class="verified-badge" style="vertical-align:middle;">✓ Verified</span>{% endif %}</h2>
+  <div class="sub" style="margin-bottom:6px;">📍 {{ property.location }}, Dhaka · {% if property.floor == 0 %}Ground floor{% else %}Floor {{ property.floor }}{% endif %}</div>
+  <div style="margin-bottom:14px;" class="d-flex align-items-center gap-2 flex-wrap">
+    <span class="price-tag static">৳{{ property.price|intcomma }} <span class="unit">/month</span></span>
+    <span class="tag">{% if property.is_negotiable %}Negotiable{% else %}Fixed{% endif %}</span>
+  </div>
+
+  <div class="details-grid">
+    <div><b>Category</b>{{ property.get_category_display }}{% if property.tenant_gender != 'any' %} · {{ property.tenant_gender|title }}{% endif %}</div>
+    <div><b>Pricing Type</b>{% if property.is_negotiable %}Negotiable{% else %}Fixed{% endif %}</div>
+    <div><b>Property Type</b>{{ property.get_property_type_display }}</div>
+    <div><b>Bedrooms</b>{{ property.bedrooms }}</div>
+    <div><b>Bathrooms</b>{{ property.bathrooms }}</div>
+    <div><b>Balcony</b>{{ property.balconies }}</div>
+    <div><b>Parking</b>{{ property.parking|yesno:'Yes,No' }}</div>
+    <div><b>Pets</b>{{ property.pet_friendly|yesno:'Allowed,Not allowed' }}</div>
+    <div><b>Available From</b>{% if property.available_from %}{{ property.available_from|date:'d M Y' }}{% else %}Now{% endif %}</div>
+  </div>
+
+  <div class="details-amenities">
+    {% for a in property.amenities.all %}<span class="tag">{{ a.name }}</span>{% empty %}<span class="tag">No extra amenities listed</span>{% endfor %}
+  </div>
+
+  <h2 class="section-h">Utilities &amp; Policies</h2>
+  <div class="util-grid">
+    <div><b>Gas Service</b>{% if property|has_amenity:'gas' %}Line Gas{% else %}Cylinder Gas / ask landlord{% endif %}</div>
+    <div><b>Water Supply</b>{% if property|has_amenity:'water' %}24/7 Available{% else %}Limited Hours{% endif %}</div>
+    <div><b>Lift</b>{{ property|has_amenity:'lift'|yesno:'Yes,No' }}</div>
+    <div><b>Advance</b>{{ property.advance_months }} month{{ property.advance_months|pluralize }} (৳{{ property.advance_amount|intcomma }})</div>
+  </div>
+
+  <h2 class="section-h">Estimated Monthly Cost</h2>
+  <div class="util-grid">
+    <div><b>Rent</b>৳{{ property.price|intcomma }}</div>
+    <div><b>Service Charge</b>৳{{ property.service_charge|intcomma }}</div>
+    {% for u in property.utilities.all %}
+      <div><b>{{ u.get_name_display }}{% if u.billing_period == 'yearly' %} (yearly ÷ 12){% endif %}</b>{% if u.included_in_rent %}Included in rent{% else %}৳{{ u.monthly_amount|floatformat:0|intcomma }}{% endif %}</div>
+    {% endfor %}
+  </div>
+  <div class="cost-total-row"><span>Total per month</span><span class="amt">{{ property.monthly_cost|taka }}</span></div>
+
+  {% if property.house_rules %}
+  <h2 class="section-h">House Rules</h2>
+  <div class="policy-box">{{ property.house_rules }}</div>
+  {% endif %}
+
+  <h2 class="section-h">Location</h2>
+  <div class="util-grid">
+    <div><b>Area</b>{{ property.location }}</div>
+    <div><b>City</b>Dhaka</div>
+    <div><b>Address</b>{% if user.is_authenticated %}{{ property.address }}{% else %}🔒 Locked information{% endif %}</div>
+  </div>
+
+  <h2 class="section-h">About This Home</h2>
+  <div class="policy-box">{{ property.description }}</div>
+
+  <div id="actions" style="margin-top:22px;">
+    {% if user.is_authenticated and not user.is_platform_admin and property.landlord_id != user.id %}
+      <button class="modal-submit brick" onclick="openModal('landlordModal')">📞 Contact Landowner</button>
+      <form method="post" action="{% url 'interactions:favourite_toggle' property.pk %}">{% csrf_token %}
+        <button class="btn btn-outline" style="width:100%;margin-top:10px;padding:11px;">{% if fav %}♥ Saved to Favorites{% else %}♡ Save to Favorites{% endif %}</button>
+      </form>
+      <div class="modal-note">Save homes to your favorites, then use Compare Now to see 2 or 3 of them side by side.</div>
+    {% elif not user.is_authenticated %}
+      <a class="modal-submit brick" href="{% url 'accounts:login' %}?next={{ request.path|urlencode }}" onclick="return !needLogin('Please log in first, then you can see the phone number of the landowner.')">📞 Contact Landowner</a>
+      <a class="btn btn-outline" style="width:100%;margin-top:10px;padding:11px;" href="{% url 'accounts:login' %}?next={{ request.path|urlencode }}" onclick="return !needLogin('Please log in first, then you can save this property to your favorites.')">♡ Save to Favorites</a>
+      <div class="modal-switch">New here? <a href="{% url 'accounts:register' %}" onclick="return !openModal('signupModal')">Create a free account</a></div>
+    {% elif property.landlord_id != user.id %}
+      <button class="modal-submit brick" onclick="openModal('landlordModal')">📞 Contact Landowner</button>
+    {% endif %}
+  </div>
+
+</div>
+
+{% endblock %}
+
+{% block modals %}
+<!-- Landowner contact: number with a copy button -->
+{% if user.is_authenticated %}
+<div class="sh-backdrop" id="landlordModal">
+  <div class="sh-modal">
+    <button class="modal-close" onclick="closeModal('landlordModal')">✕</button>
+    <h2>Contact Landowner</h2>
+    <div class="sub">{{ property.landlord.get_full_name|default:property.landlord.username }}{% if property.landlord.profile.status == 'verified' %} · ✓ Verified owner{% endif %}</div>
+    <div class="number-row">
+      <span class="masked-number" data-contact-number>{{ property.landlord.phone|default:'No phone number added' }}</span>
+      {% if property.landlord.phone %}<button type="button" class="btn btn-outline btn-sm" onclick="copyContactNumber(this)">📋 Copy</button>{% endif %}
+    </div>
+  </div>
+</div>
+{% endif %}
+
+{% endblock %}
