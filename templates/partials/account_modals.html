@@ -1,0 +1,71 @@
+{% if user.is_authenticated %}
+<!-- Settings Modal -->
+<div class="sh-backdrop" id="settingsModal">
+  <div class="sh-modal">
+    <button class="modal-close" onclick="closeModal('settingsModal')">✕</button>
+    <h2>Settings</h2>
+    <div class="sub">Signed in as {{ user.get_full_name|default:user.username }}</div>
+    <a class="modal-submit" href="{% url 'dashboard:home' %}">Dashboard</a>
+    <a class="modal-submit ink" href="{% url 'accounts:profile' %}" style="margin-top:10px;">My Profile</a>
+    <div class="modal-switch" style="margin-top:16px;line-height:2;">
+      {% if user.is_platform_admin %}
+        <a href="{% url 'dashboard:moderation_list' %}">Listings</a> &nbsp;|&nbsp; <a href="{% url 'dashboard:verification_list' %}">Verification</a><br>
+      {% endif %}
+      <a href="{% url 'accounts:password_change' %}">Change Password</a> &nbsp;|&nbsp;
+      <form method="post" action="{% url 'accounts:logout' %}" class="d-inline">{% csrf_token %}<button class="linklike">Log Out</button></form>
+    </div>
+  </div>
+</div>
+{% else %}
+<!-- Login Required Modal: shown when a guest clicks something that needs an account -->
+<div class="sh-backdrop" id="loginRequiredModal">
+  <div class="sh-modal" style="text-align:center;">
+    <button class="modal-close" onclick="closeModal('loginRequiredModal')">✕</button>
+    <div style="font-size:34px;margin-bottom:6px;">🔒</div>
+    <h2>Log in required</h2>
+    <div class="sub" data-login-reason>Please log in first, then you can see this.</div>
+    <button class="modal-submit" onclick="switchModal('loginRequiredModal','loginModal')">Log In</button>
+    <div class="modal-switch">New here? <a onclick="switchModal('loginRequiredModal','signupModal')">Create a free account</a></div>
+  </div>
+</div>
+
+<!-- Login Modal -->
+<div class="sh-backdrop" id="loginModal">
+  <div class="sh-modal">
+    <button class="modal-close" onclick="closeModal('loginModal')">✕</button>
+    <h2>Log In</h2>
+    <div class="sub">Enter your number and password to continue</div>
+    <form method="post" action="{% url 'accounts:login' %}">{% csrf_token %}
+      <input type="hidden" name="next" value="{{ request.get_full_path }}">
+      <div class="field"><label for="m-login-user">Phone Number</label><input id="m-login-user" name="username" type="text" inputmode="tel" placeholder="01XXXXXXXXX" autocomplete="username" required></div>
+      <div class="field"><label for="m-login-pass">Password</label>
+        <div class="pw-wrap"><input id="m-login-pass" type="password" name="password" placeholder="••••••" autocomplete="current-password" required><button type="button" class="pw-toggle" onclick="togglePassword(this)" aria-label="Show password">👁</button></div>
+      </div>
+      <button class="modal-submit">Log In</button>
+    </form>
+    <div class="modal-note">You can also use your email.</div>
+    <div class="modal-switch">Don't have an account? <a href="{% url 'accounts:register' %}" onclick="switchModal('loginModal','signupModal'); return false;">Sign Up</a></div>
+  </div>
+</div>
+
+<!-- Signup Modal -->
+<div class="sh-backdrop" id="signupModal">
+  <div class="sh-modal">
+    <button class="modal-close" onclick="closeModal('signupModal')">✕</button>
+    <h2>Sign Up</h2>
+    <div class="sub">One account to find a home and to post your own property</div>
+    <form method="post" action="{% url 'accounts:register' %}">{% csrf_token %}
+      <div class="field"><label for="m-first">Your Name</label><input id="m-first" name="first_name" placeholder="e.g. Rahim Uddin" autocomplete="name" required></div>
+      <div class="field"><label for="m-phone">Phone Number</label><input id="m-phone" type="tel" name="phone" placeholder="01XXXXXXXXX" autocomplete="tel" required></div>
+      <div class="field"><label for="m-p1">Password <span style="font-weight:400;color:var(--muted-2);">(at least 6 characters)</span></label>
+        <div class="pw-wrap"><input id="m-p1" type="password" name="password1" placeholder="••••••" minlength="6" autocomplete="new-password" required><button type="button" class="pw-toggle" onclick="togglePassword(this)" aria-label="Show password">👁</button></div>
+      </div>
+      <div class="field"><label for="m-p2">Confirm Password</label>
+        <div class="pw-wrap"><input id="m-p2" type="password" name="password2" placeholder="••••••" minlength="6" autocomplete="new-password" required><button type="button" class="pw-toggle" onclick="togglePassword(this)" aria-label="Show password">👁</button></div>
+      </div>
+      <button class="modal-submit">Sign Up</button>
+    </form>
+    <div class="modal-switch">Already have an account? <a href="{% url 'accounts:login' %}" onclick="switchModal('signupModal','loginModal'); return false;">Log In</a></div>
+  </div>
+</div>
+{% endif %}

@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+{% block title %}Log In{% endblock %}
+{% block content %}
+<div class="auth-wrap">
+  <div class="sh-modal static">
+    <h2>Log In</h2>
+    <div class="sub">Enter your number and password to continue</div>
+    {% if next and not error %}<div class="status-note warn">🔒 Please log in first, then you can see this page.</div>{% endif %}
+    <form method="post" novalidate>{% csrf_token %}
+      {% if error %}<div class="errorlist mb-3">Phone number or password is not correct. Please try again.</div>{% endif %}
+      <div class="field">
+        <label for="id_username">Phone Number</label>
+        <input type="text" inputmode="tel" name="username" id="id_username" value="{{ username }}" placeholder="01XXXXXXXXX" autocomplete="username" required autofocus>
+      </div>
+      <div class="field">
+        <label for="id_password">Password</label>
+        <div class="pw-wrap"><input type="password" name="password" id="id_password" placeholder="••••••" autocomplete="current-password" required><button type="button" class="pw-toggle" onclick="togglePassword(this)" aria-label="Show password">👁</button></div>
+      </div>
+      <input type="hidden" name="next" value="{{ next }}">
+      <button class="modal-submit">Log In</button>
+    </form>
+    <div class="modal-note">You can also use your email.</div>
+    <div class="modal-switch">Don't have an account? <a href="{% url 'accounts:register' %}">Sign Up</a></div>
+  </div>
+</div>
+{% endblock %}
