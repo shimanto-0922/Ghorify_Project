@@ -1,0 +1,12 @@
+<!-- Contact Modal: shows the landowner's number with a copy button (logged-in users) -->
+<div class="sh-backdrop" id="contactModal">
+  <div class="sh-modal">
+    <button class="modal-close" onclick="closeModal('contactModal')">✕</button>
+    <h2>Contact Landowner</h2>
+    <div class="sub" data-contact-title>Property</div>
+    <div class="number-row">
+      <span class="masked-number" data-contact-number>—</span>
+      <button type="button" class="btn btn-outline btn-sm" onclick="copyContactNumber(this)">📋 Copy</button>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,37 @@
+{% load ghorify_tags humanize %}{% is_favourite p as fav %}
+<div class="sh-card">
+  <div class="card-img"{% with img=p.primary_image %}{% if img %} style="background-image:url('{{ img.image.url }}')"{% endif %}{% endwith %}>
+    <a class="img-link" href="{% url 'properties:property_detail' p.id %}" aria-label="{{ p.title }}"></a>
+    <span class="price-tag">৳{{ p.price|intcomma }}</span>
+    <span class="neg-tag">{% if p.is_negotiable %}Negotiable{% else %}Fixed{% endif %}</span>
+    {% if user.is_authenticated and not user.is_platform_admin and p.landlord_id != user.id %}
+      <form method="post" action="{% url 'interactions:favourite_toggle' p.pk %}">{% csrf_token %}
+        <input type="hidden" name="next" value="{{ request.get_full_path }}">
+        <button class="fav-btn" title="{% if fav %}Remove from favorites{% else %}Save to favorites{% endif %}">{% if fav %}♥{% else %}♡{% endif %}</button>
+      </form>
+    {% elif not user.is_authenticated %}
+      <a class="fav-btn" title="Log in to save" href="{% url 'accounts:login' %}?next={{ request.get_full_path|urlencode }}" onclick="return !needLogin('Please log in first, then you can save this property to your favorites.')">♡</a>
+    {% endif %}
+    <div class="badge-row">
+      {% if p.landlord.profile.status == 'verified' %}<span class="verified-badge">✓ Verified</span>{% endif %}
+    </div>
+  </div>
+  <div class="card-body">
+    <a class="card-title" href="{% url 'properties:property_detail' p.id %}">{{ p.title }}</a>
+    <div class="card-loc">📍 {{ p.location }}, Dhaka · {% if p.floor == 0 %}Ground floor{% else %}Floor {{ p.floor }}{% endif %}</div>
+    <div class="tag-row">
+      <span class="tag">{{ p.get_category_display }}</span>
+      {% if p.tenant_gender != 'any' %}<span class="tag">{{ p.tenant_gender|title }}</span>{% endif %}
+      <span class="tag">{{ p.bedrooms }} Bed · {{ p.bathrooms }} Bath</span>
+      {% with first=p.amenities.all|first %}{% if first %}<span class="tag">{{ first.name }}</span>{% endif %}{% endwith %}
+    </div>
+  </div>
+  <div class="card-actions">
+    <a class="btn btn-outline" href="{% url 'properties:property_detail' p.id %}">Details</a>
+    {% if user.is_authenticated %}
+      <a class="btn btn-contact" onclick="openContact('{{ p.title|escapejs }}', '{{ p.landlord.phone|escapejs }}')">Contact</a>
+    {% else %}
+      <a class="btn btn-contact" href="{% url 'accounts:login' %}?next={{ request.get_full_path|urlencode }}" onclick="return !needLogin('Please log in first, then you can see the phone number of the landowner.')">Contact</a>
+    {% endif %}
+  </div>
+</div>
