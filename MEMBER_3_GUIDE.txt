@@ -1,5 +1,4 @@
 Member 3 - interactions + search apps
-=====================================
 
 How to use:
   1. git clone the team repo and open the folder
