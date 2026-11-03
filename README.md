@@ -53,16 +53,17 @@ python -m venv venv
 venv\Scripts\activate          # Windows  (macOS/Linux: source venv/bin/activate)
 pip install -r requirements.txt
 python manage.py migrate
-python manage.py seed_demo     # demo users, listings and photos
 python manage.py runserver
 ```
 
-Open http://127.0.0.1:8000. Step-by-step instructions (in Banglish) are in `HOW_TO_RUN.txt`.
-To rebuild the demo data from scratch, run `python manage.py seed_demo --reset`.
+The repository already includes `db.sqlite3` and `media/` with demo data. To rebuild the demo data from
+scratch, run `python manage.py seed_demo --reset`.
 
-Demo accounts (password `ghorify123`): `admin` (platform admin); Rahim `01711000001` and
-Nasrin `01811000002` (verified, have listings); Kamal `01911000003` (waiting for verification);
-Tanvir `01611000004`, Mim `01511000005` and Sakib `01311000006` (looking for a home).
+Open http://127.0.0.1:8000.
+
+Demo accounts (password `ghorify123`): `admin` (platform admin); `rahim` and `nasrin` (verified,
+have listings); `kamal` (waiting for verification); `tanvir`, `mim` and `sakib` (looking for a home).
+You can also log in with the phone number, e.g. `01611000004` for tanvir.
 
 Run the tests with `python manage.py test`.
 
