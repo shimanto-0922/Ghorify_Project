@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+{% load ghorify_tags %}
+{% block title %}Compare Homes{% endblock %}
+{% block content %}
+<div class="details-page-topbar">
+  <a class="btn btn-outline" href="{% url 'interactions:compare_select' %}">← Choose Again</a>
+</div>
+<div class="container py-4">
+  <div class="herostrip" style="padding:0 0 16px;">
+    <h1>Side-by-side Comparison</h1>
+    <p>{{ items|length }} homes side by side</p>
+  </div>
+  <div class="gh-card overflow-hidden">
+    <div class="table-responsive">
+      <table class="compare-table">
+        <thead>
+          <tr>
+            <th style="background:var(--white)"></th>
+            {% for item in items %}{% with p=item.property %}
+            <td class="compare-head p-3" style="min-width:220px;vertical-align:top">
+              {% with img=p.primary_image %}{% if img %}<img src="{{ img.image.url }}" alt="">{% else %}<div class="placeholder-img"><i class="bi bi-house"></i></div>{% endif %}{% endwith %}
+              <a href="{% url 'properties:property_detail' p.id %}" class="d-block fw-bold mt-2" style="color:var(--forest-dark)">{{ p.title }}</a>
+            </td>
+            {% endwith %}{% endfor %}
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th>Monthly rent</th>
+            {% for item in items %}<td>{{ item.property.price|taka }}</td>{% endfor %}
+          </tr>
+          <tr>
+            <th>Estimated total / month</th>
+            {% for item in items %}<td>{{ item.property.monthly_cost|taka }}</td>{% endfor %}
+          </tr>
+          <tr>
+            <th>Advance</th>
+            {% for item in items %}<td>{{ item.property.advance_amount|taka }}</td>{% endfor %}
+          </tr>
+          <tr>
+            <th>Area</th>
+            {% for item in items %}<td>{{ item.property.location }}</td>{% endfor %}
+          </tr>
+          <tr>
+            <th>Type</th>
+            {% for item in items %}<td>{{ item.property.get_property_type_display }}</td>{% endfor %}
+          </tr>
+          <tr>
+            <th>Category</th>
+            {% for item in items %}<td>{{ item.property.get_category_display }}</td>{% endfor %}
+          </tr>
+          <tr>
+            <th>Bedrooms</th>
+            {% for item in items %}<td>{{ item.property.bedrooms }}</td>{% endfor %}
+          </tr>
+          <tr>
+            <th>Bathrooms</th>
+            {% for item in items %}<td>{{ item.property.bathrooms }}</td>{% endfor %}
+          </tr>
+          <tr>
+            <th>Balcony</th>
+            {% for item in items %}<td>{{ item.property.balconies }}</td>{% endfor %}
+          </tr>
+          <tr>
+            <th>Floor</th>
+            {% for item in items %}<td>{% if item.property.floor == 0 %}Ground floor{% else %}Floor {{ item.property.floor }}{% endif %}</td>{% endfor %}
+          </tr>
+          <tr>
+            <th>Parking</th>
+            {% for item in items %}<td>{% if item.property.parking %}<span style="color:var(--good);font-weight:700;">✓ Yes</span>{% else %}<span style="color:var(--muted-2);">— No</span>{% endif %}</td>{% endfor %}
+          </tr>
+          <tr>
+            <th>Pet friendly</th>
+            {% for item in items %}<td>{% if item.property.pet_friendly %}<span style="color:var(--good);font-weight:700;">✓ Yes</span>{% else %}<span style="color:var(--muted-2);">— No</span>{% endif %}</td>{% endfor %}
+          </tr>
+          <tr>
+            <th>Amenities</th>
+            {% for item in items %}<td>{% for a in item.property.amenities.all %}{{ a.name }}{% if not forloop.last %}, {% endif %}{% empty %}-{% endfor %}</td>{% endfor %}
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}
