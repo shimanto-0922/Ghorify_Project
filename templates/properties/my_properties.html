@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+{% load ghorify_tags humanize %}
+{% block title %}My listings{% endblock %}
+{% block content %}
+<div class="container">
+  <div class="page-header d-flex flex-wrap justify-content-between align-items-end gap-3">
+    <div><span class="eyebrow">My properties</span><h1>My listings</h1></div>
+    <a href="{% url 'properties:property_create' %}" class="btn btn-primary"><i class="bi bi-plus-lg me-1"></i>Add a property</a>
+  </div>
+
+  <ul class="nav nav-pills-gh gap-1 mb-4">
+    <li><a class="nav-link {% if not active_status %}active{% endif %}" href="?">All</a></li>
+    <li><a class="nav-link {% if active_status == 'approved' %}active{% endif %}" href="?status=approved">Published</a></li>
+    <li><a class="nav-link {% if active_status == 'pending' %}active{% endif %}" href="?status=pending">Pending</a></li>
+    <li><a class="nav-link {% if active_status == 'rejected' %}active{% endif %}" href="?status=rejected">Rejected</a></li>
+  </ul>
+
+  {% if properties %}
+  <div class="gh-card overflow-hidden">
+    <div class="table-responsive">
+      <table class="gh-table">
+        <thead><tr><th>Property</th><th>Rent</th><th>Status</th><th class="text-end">Actions</th></tr></thead>
+        <tbody>
+        {% for p in properties %}
+          <tr>
+            <td>
+              <div class="d-flex align-items-center gap-3">
+                {% with img=p.primary_image %}{% if img %}<img src="{{ img.image.url }}" class="mini-thumb" alt="">{% else %}<span class="mini-thumb"><i class="bi bi-image"></i></span>{% endif %}{% endwith %}
+                <div><a href="{% url 'properties:property_detail' p.id %}" class="fw-bold text-reset">{{ p.title }}</a><div class="small text-muted">{{ p.location }} · {{ p.get_category_display }}</div></div>
+              </div>
+            </td>
+            <td class="fw-semibold">{{ p.price|taka }}</td>
+            <td><span class="status status-{{ p.status }}">{{ p.get_status_display }}</span>
+              {% if p.status == 'rejected' and p.moderation_note %}<div class="small text-danger mt-1" style="max-width:220px">{{ p.moderation_note }}</div>{% endif %}</td>
+            <td class="text-end text-nowrap">
+              <a href="{% url 'properties:image_list' p.pk %}" class="btn btn-sm btn-soft" title="Photos"><i class="bi bi-images"></i></a>
+              <a href="{% url 'properties:utility_list' p.pk %}" class="btn btn-sm btn-soft" title="Bills"><i class="bi bi-receipt"></i></a>
+              <a href="{% url 'properties:property_update' p.pk %}" class="btn btn-sm btn-soft" title="Edit"><i class="bi bi-pencil"></i></a>
+              <a href="{% url 'properties:property_delete' p.pk %}" class="btn btn-sm btn-outline-danger" title="Delete"><i class="bi bi-trash"></i></a>
+            </td>
+          </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  {% else %}
+    {% url 'properties:property_create' as new_url %}
+    {% include 'partials/empty.html' with icon='bi-house-add' title='No listings here' text='Add your first property and start receiving visit requests.' link=new_url link_label='Add a property' %}
+  {% endif %}
+</div>
+{% endblock %}
