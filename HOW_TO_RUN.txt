@@ -1,0 +1,58 @@
+Ghorify - kivabe chalabe
+========================
+
+Lagbe: Python 3.12 ba notun (install er somoy "Add Python to PATH" e tick), ar internet.
+
+
+PROTHOMBAR (ekbar e korte hobe)
+-------------------------------
+
+1. Code nao (je kono ekta):
+     git clone https://github.com/shimanto-0922/Ghorify_Project.git
+     cd Ghorify_Project
+   othoba GitHub e "Code" -> "Download ZIP", extract kore oi folder e terminal kholo.
+
+2. Ei command gula ek ek kore chalao:
+     python -m venv venv
+     venv\Scripts\activate
+     pip install -r requirements.txt
+     python manage.py migrate
+     python manage.py seed_demo
+     python manage.py runserver
+
+3. Browser e kholo:  http://127.0.0.1:8000
+
+   (macOS/Linux e "venv\Scripts\activate" er bodole: source venv/bin/activate)
+
+
+POR THEKE (protibar chalate)
+----------------------------
+     venv\Scripts\activate
+     python manage.py runserver
+
+
+DEMO LOGIN (password shobar: ghorify123)
+----------------------------------------
+     Admin   : admin
+     Rahim   : 01711000001   (verified, listing ache)
+     Nasrin  : 01811000002   (verified, listing ache)
+     Kamal   : 01911000003   (verification baki)
+     Tanvir  : 01611000004   (bari khujche)
+     Mim     : 01511000005
+     Sakib   : 01311000006
+   Django admin panel: http://127.0.0.1:8000/admin/  (admin / ghorify123)
+
+
+ONNANNO COMMAND
+---------------
+     python manage.py test               -> shob test chalano
+     python manage.py seed_demo --reset  -> demo data muche notun kore banano
+     Ctrl + C                            -> server bondho
+
+
+SHOMOSSA HOLE
+-------------
+- Kono listing nai      -> "python manage.py seed_demo" chalano hoy nai.
+- Bachelor page khali   -> Bachelor er por "Male" ba "Female" e click koro.
+- 'python' chene na     -> Python install er somoy "Add Python to PATH" tick dao, ba "py" likho.
+- Design sadamata       -> internet nai (Bootstrap ar font internet theke ashe).
